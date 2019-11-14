@@ -1,0 +1,25 @@
+<table align="center" border="2">
+    <tr>
+        <th>Passport No</th>
+        <th>Person No</th>
+    </tr>
+
+    {% for x in data %}
+     <tr>
+        <th>{{ x.pno }}</th>
+        <th>
+            {{ x.p_details }}
+
+            <table border="2">
+                <tr>
+                    <th>{{ x.p_details.aadhar }}</th>
+                    <th>{{ x.p_details.contact }}</th>
+                    <th>{{ x.p_details.address }}</th>
+                </tr>
+            </table>
+
+        </th>
+    </tr>
+
+    {% endfor %}
+</table>

@@ -1,0 +1,20 @@
+
+<a href="{% url 'addpe' %}">
+    <h3> Add Person </h3>
+</a>
+
+<a href="{% url 'viewpe' %}">
+    <h3> View Person </h3>
+</a>
+
+<a href="{% url 'addpa' %}">
+    <h3> Add Passport </h3>
+</a>
+
+<a href="{% url 'viewpa' %}">
+    <h3> View Passport </h3>
+</a>
+
+{% for x in messages %}
+    {{ x }}
+{% endfor %}
