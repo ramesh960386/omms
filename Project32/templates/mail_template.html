@@ -1,0 +1,46 @@
+<html>
+<head>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+        }
+
+        thead {
+            background-color: deepskyblue;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<table>
+    <caption>List of Employees</caption>
+    <thead>
+    <tr>
+        <th>S.No</th>
+        <th align="center">Emp Code</th>
+        <th align="center">Scan Date</th>
+        <th align="center">Scan Time</th>
+        <th align="center">Punch</th>
+        <th>Temperature</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for x in context %}
+        <tr>
+            <td align="right" width="5%">{{ forloop.counter }}</td>
+            <td align="center" width="12%">{{ x.emp_code }}</td>
+            <td align="center" width="12%">{{ x.scan_date|date:'d-m-Y' }}</td>
+            <td>{{ x.scan_time|default:"" }}</td>
+            <td>{{ x.punch|default:"" }}</td>
+            <td>{{ x.temperature|default:"" }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>

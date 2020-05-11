@@ -1,0 +1,290 @@
+<!doctype html>
+{% load static %}
+{% load crispy_forms_tags %}
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" href="{% static 'img/orb_logo.png' %}" type="image/gif" sizes="16x16">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <title>Hello, world!</title>
+</head>
+<style>
+    .ramesh {
+        border-style: none;
+    }
+
+    #wrapper {
+        display: flex;
+    }
+
+    #left {
+        flex: 0 0 65%;
+
+    }
+
+    #right {
+        flex: 1;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+    input:checked + .slider {
+        background-color: #2196F3;
+    }
+
+    input:focus + .slider {
+        box-shadow: 0 0 1px #2196F3;
+    }
+
+    input:checked + .slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+    }
+
+    /* Rounded sliders */
+    .slider.round {
+        border-radius: 34px;
+    }
+
+    .slider.round:before {
+        border-radius: 50%;
+    }
+
+</style>
+<body>
+{% include 'title.html' %}
+{% include 'menu.html' %}
+
+<div class="col-lg-12">
+    <marquee>Please Scan your ID Card</marquee>
+    <br>
+    <div class="card">
+        <div class="card-body" id="wrapper" style="padding-left:0;">
+            <div id="left" class="col-sm-4">
+
+                <video id="preview" class="col-sm-12 table-bordered" height="42%"
+                       style="padding-left: 0;padding-top: 0;"></video>
+
+                <img width="90%" id="no_webcam" style="max-height: 250px;">
+                <div class="row" style="padding-top: 1em">
+                    <form method="post" id="qrform" novalidate style="padding-left: 1em" class="form-horizontal">
+                        {% csrf_token %}
+
+                        <table class="table table-bordered table-condensed">
+                            <thead style="background-color: dodgerblue;color: white;font-weight: normal">
+                            <tr>
+                                <th>Emp Photo</th>
+                                <th colspan="2" align="center">Details</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td width="30%">
+                                    <img id="emp_img" width="100%"
+                                         style="max-height: 250px;padding-left: 0;padding-right: 0"><br><br>
+                                    <span id="emp_name" style="color: orangered;font-weight: bold"></span>
+                                </td>
+                                <td>
+                                    <table>
+                                        <tr>
+                                            <td>{{ form.emp_code|as_crispy_field }}</td>
+                                            <td>{{ form.scan_date|as_crispy_field }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{ form.scan_time|as_crispy_field }}</td>
+                                            <td>{{ form.temperature|as_crispy_field }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" align="center">
+                                                <button type="submit" class="btn btn-info">Save</button>
+                                                <button type="reset" class="btn btn-s btn-danger">Reset</button>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+            </div>
+
+            <div id="right" class="table-responsive">
+                <label class="switch">
+                    <input type="checkbox" checked id="cameraid" onchange="cameraswitch()">
+                    <span class="slider round"></span>
+                </label> On/Off Camera |
+                <a href="{% url 'export_data' %}">Export Today Data</a>
+                | <a href="{% url 'sendmail_html' %}">sendmail_html</a>
+                | <a href="{% url 'sendmail_attachment' %}">sendmail_attachment</a>
+                <table class="table table-bordered table-condensed table-sm">
+                    <caption>List of Employees</caption>
+                    <thead class="thead-dark">
+                    <tr>
+                        <th>S.No</th>
+                        <th align="center">Emp Code</th>
+                        <th align="center">Scan Date</th>
+                        <th align="center">Scan Time</th>
+                        <th align="center">Punch</th>
+                        <th>Temperature</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for x in qr_data %}
+                        <tr>
+                            <td align="right" width="5%">{{ forloop.counter }}</td>
+                            <td align="center" width="12%">{{ x.emp_code }}</td>
+                            <td align="center" width="12%">{{ x.scan_date|date:'d-m-Y' }}</td>
+                            <td>{{ x.scan_time|default:"" }}</td>
+                            <td>{{ x.punch|default:"" }}</td>
+                            <td>{{ x.temperature|default:"" }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<audio id="myAudio">
+    <source src="{% static 'audio/Success-sound-effect.mp3' %}" type="audio/ogg">
+</audio>
+
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
+
+{# <script src="{% static 'js/jquery-1.11.2.js' %}"></script> #}
+{# <script src="{% static 'js/jquery-1.11.2.min.js' %}"></script> #}
+
+<script type="text/javascript">
+
+    var webcam_preview = document.getElementById('preview');
+    var id_emp_code = document.getElementById("id_emp_code");
+
+    let scanner = new Instascan.Scanner({video: webcam_preview});
+    scanner.addListener('scan', function (content) {
+
+        if (content.length > 0) {
+            /** document.getElementById('emp_img').src = "/media/emp_photos/" + content + ".jpeg"; **/
+            document.getElementById("myAudio").play();
+            id_emp_code.value = content;
+            /**id_emp_code.className = "bg-success text-white";**/
+            id_emp_code.readOnly = true;
+            id_emp_code.style.backgroundColor = "green";
+            id_emp_code.style.color = "white";
+            document.getElementById("id_temperature").focus();
+        }
+    });
+
+    function cameraswitch() {
+        var webcam = document.getElementById('no_webcam');
+
+        Instascan.Camera.getCameras().then(function (cameras) {
+
+            if (cameras.length > 0 && document.getElementById('cameraid').checked) {
+                cam_id = 0
+                scanner.start(cameras[cam_id]);
+                webcam_preview.style.display = "block";
+                webcam.style.display = "none";
+
+            } else if (cameras.length === 0) {
+                console.error('No cameras found.');
+            } else {
+                scanner.stop(cameras[cam_id]);
+                webcam_preview.style.display = "none";
+                webcam.style.display = "block";
+                webcam.src = "{% static 'img/camera-icon.jpg' %}";
+                document.getElementById("qrform").reset();
+            }
+        }).catch(function (e) {
+            console.error(e);
+        });
+    }
+
+    window.onload = cameraswitch();
+
+</script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script>
+    $(document).ready(function () {
+
+        $("#id_temperature").focusin(function () {
+            /** if (emp_code.value.length > 0) {alert("maxlength reached");} **/
+            $(this).css("border", "5px solid orange");
+            var selection_id = $('#id_emp_code').val();
+            $.ajax({
+                url: '{% url "emp_info" %}',
+                type: 'get',
+                data: {'searchkey': selection_id,},
+                dataType: 'json',
+                success: function (data) {
+                    $("#emp_name").text(data.emp_name);
+                    $('#emp_img').attr('src', data.emp_photo);
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
